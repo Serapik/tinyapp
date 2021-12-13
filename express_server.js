@@ -55,6 +55,18 @@ app.post('/login', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+app.get('/', (req, res) => {
+  res.redirect('/urls');
+});
+
+app.get('/register', (req, res) => {
+  const templateVars = {
+    username: req.cookies['username']
+  };
+  res.render('register', templateVars);
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
