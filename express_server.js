@@ -2,6 +2,7 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const app = express();
+const path = require('path');
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
@@ -9,6 +10,20 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+const users = {
+};
+
+app.set('views', path.join(__dirname, "views"));
+app.set('view engine', 'ejs');
+
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser());
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -46,6 +61,16 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+app.post('/register', (req, res) => {
+  const generatedID = generateRandomString(10);
+  users[generatedID] = {
+    id: generatedID,
+    email: req.body.username,
+    password: req.body.password
+  };
+  res.cookie('user_id', generatedID);
+  res.redirect('/urls');
+});
 
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
@@ -73,4 +98,4 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-const generateRandomString = () => Math.random().toString(36).slice(2, 8);
+const generateRandomString = (length) => Math.random().toString(36).slice(2, length + 2);
