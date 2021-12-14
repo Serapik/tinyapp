@@ -101,6 +101,52 @@ app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+app.get("/urls/:shortURL", (req, res) => {
+  if (urlDatabase[req.params.shortURL]) {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      urlUser: urlDatabase[req.params.shortURL].userID,
+      user: users[req.session.user_id],
+    };
+    res.render('urls_show', templateVars);
+  } else {
+    res.send("This url is not belong you")
+  }
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  if (urlDatabase[req.params.shortURL]) {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(404).send('This short URL does not exist');
+  }
+});
+
+app.get("/urls/:shortURL", (req, res) => {
+  if (urlDatabase[req.params.shortURL]) {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      urlUser: urlDatabase[req.params.shortURL].userID,
+      user: users[req.session.user_id],
+    };
+    res.render('urls_show', templateVars);
+  } else {
+    res.send("<h4>This url is not belong you</h4>")
+  }
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  if (urlDatabase[req.params.shortURL]) {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(404).send('This short URL does not exist');
+  }
+});
+
 app.get('/register', (req, res) => {
   const templateVars = {
     username: users[session.userID]};
@@ -131,15 +177,8 @@ app.post("/register", (req, res) => {
     return res.send("<h4>Email or password can not be empty!</h4>");
   }
 });
-  const newUserID = generateRandomString();
-  users[newUserID] = {
-    id: newUserID,
-    email: submittedEmail,
-    password: submittedPassword
-  };
-  res.cookie('user_id', newUserID);
-  res.redirect("/urls");
-});
+
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
