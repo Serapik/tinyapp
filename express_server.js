@@ -23,10 +23,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/login');
 });
 
 const bodyParser = require("body-parser");
@@ -57,6 +59,14 @@ app.get("/urls/:shortURL", (req, res) => {
   
   res.render('urls_show', templateVars);
 });
+
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user: users[req.cookies["user_id"]],
+  };
+  
+  res.render("urls_login", templateVars);
+});
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
@@ -77,9 +87,7 @@ app.post('/login', (req, res) => {
   res.redirect('urls');
 });
   
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+
 
 app.get('/', (req, res) => {
   res.redirect('/urls');
