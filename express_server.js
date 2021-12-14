@@ -8,13 +8,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs"); //bcrypt added
 
-const userAlreadyExists = function(email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return true;
-    }
-  } return false;
-};
+
 
 app.set("view engine", "ejs");
 const urlDatabase = {
@@ -48,9 +42,6 @@ app.get("/", (req, res) => {
   res.redirect('/login');
 });
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
 
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -112,45 +103,34 @@ app.get('/', (req, res) => {
 
 app.get('/register', (req, res) => {
   const templateVars = {
-    username: req.cookies['username']
-  };
+    username: users[session.userID]};
+  
   res.render('register', templateVars);
 });
+
+// registrerin e mail and password//
 app.post("/register", (req, res) => {
-  const submittedEmail = req.body.email;
-  const submittedPassword = req.body.password;
-
-  if (!submittedEmail || !submittedPassword) {
-    res.send(400, "Please include both a valid email and password");
-  }
-
-  if (userAlreadyExists(submittedEmail)) {
-    res.send(400, "An account already exists for this email address");
-  }
-  app.post("/urls/:shortURL/delete", (req, res) => {
-    const userID = req.cookies["user_id"];
-    const userUrls = urlsForUser(userID);
-    if (Object.keys(userUrls).includes(req.params.shortURL)) {
-      const shortURL = req.params.shortURL;
-      delete urlDatabase[shortURL];
+  if (req.body.email && req.body.password) {
+    if (!getUserByEmail(req.body.email, users)) {
+      const userID = generatRandomString();
+      users[userID] = {
+        userID,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, 10)
+      };
+      req.session.userID = userID;
       res.redirect('/urls');
     } else {
-      res.send(401);
+      res.statusCode = 400;
+      return res.send("<h4>Please Login, email registered</h4>");
+      
     }
-  });
 
-  app.post("/urls/:id", (req, res) => {
-    const userID = req.cookies["user_id"];
-    const userUrls = urlsForUser(userID);
-    if (Object.keys(userUrls).includes(req.params.id)) {
-      const shortURL = req.params.id;
-      urlDatabase[shortURL].longURL = req.body.newURL;
-      res.redirect('/urls');
-    } else {
-      res.send(401);
-    }
-  });
-
+  } else {
+    res.statusCode = 400;
+    return res.send("<h4>Email or password can not be empty!</h4>");
+  }
+});
   const newUserID = generateRandomString();
   users[newUserID] = {
     id: newUserID,
