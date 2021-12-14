@@ -5,13 +5,28 @@ const app = express();
 const path = require('path');
 const PORT = 8080; // default port 8080
 
+
+const userAlreadyExists = function(email) {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return true;
+    }
+  } return false;
+};
+
 app.set("view engine", "ejs");
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "12345-fskk"
+  }
 };
+
 
 app.set('views', path.join(__dirname, "views"));
 app.set('view engine', 'ejs');
@@ -64,7 +79,7 @@ app.get("/login", (req, res) => {
   let templateVars = {
     user: users[req.cookies["user_id"]],
   };
-  
+
   res.render("urls_login", templateVars);
 });
 app.get("/u/:shortURL", (req, res) => {
@@ -99,11 +114,29 @@ app.get('/register', (req, res) => {
   };
   res.render('register', templateVars);
 });
+app.post("/register", (req, res) => {
+  const submittedEmail = req.body.email;
+  const submittedPassword = req.body.password;
+
+  if (!submittedEmail || !submittedPassword) {
+    res.send(400, "Please include both a valid email and password");
+  }
+
+  if (userAlreadyExists(submittedEmail)) {
+    res.send(400, "An account already exists for this email address");
+  }
+
+  const newUserID = generateRandomString();
+  users[newUserID] = {
+    id: newUserID,
+    email: submittedEmail,
+    password: submittedPassword
+  };
+  res.cookie('user_id', newUserID);
+  res.redirect("/urls");
+});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 const generateRandomString = (length) => Math.random().toString(36).slice(2, length + 2);
