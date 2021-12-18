@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getUserByEmail } = require('../helpers.js');
+const { getUserByEmail, urlsForUser } = require('../helper');
 
 const testUsers = {
   "userRandomID": {
@@ -15,25 +15,42 @@ const testUsers = {
   }
 };
 
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  },
+  i3BoTh: {
+    longURL: "https://www.google.com",
+    userID: "aJ48ko"
+  }
+};
+
 describe('getUserByEmail', function() {
   it('should return a user with valid email', function() {
     const user = getUserByEmail("user@example.com", testUsers);
     const expectedUserID = "userRandomID";
-    // Write your assert statement here
+    assert.equal(user.id, expectedUserID);
+    assert.equal(user.email, "user@example.com");
+    assert.equal(user.password, "purple-monkey-dinosaur");
   });
-});
-describe('getUserByEmail', function() {
-  it('should undefined if email is not in database', function() {
-    const user = getUserByEmail('sometest@example.com', testUsers);
-    const expected = undefined;
-    assert.equal(user, expected);
+  it('should return undefined if email is not valid', function() {
+    const user = getUserByEmail("user1@example.com", testUsers);
+    assert.isUndefined(user);
   });
 });
 
-describe('getUserByEmail', function() {
-  it('should return a user with valid email', function() {
-    const user = getUserByEmail('user2@example.com', testUsers);
-    const expected = testUsers.user2RandomID;
-    assert.equal(user, expected);
+describe('urlsForUser', function() {
+  it('should urls for a given user', function() {
+    const urls = urlsForUser("aJ48lW", urlDatabase);
+    assert.equal(Object.keys(urls).length, 2);
+    assert.equal(Object.keys(urls)[0], 'b6UTxQ');
+  });
+  it('should return empty object if the given user is not there in url database', function() {
+    assert.deepEqual(urlsForUser("a", urlDatabase), {});
   });
 });
