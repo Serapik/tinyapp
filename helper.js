@@ -1,63 +1,52 @@
-const crypto = require('crypto');
-
-const getUserByEmail = (email, users) => {
-  for (const user of Object.values(users)) {
+// Find user in database by email
+const findUserByEmail = function(email, database) {
+  for (let userID in database) {
+    let user = database[userID];
     if (user.email === email) {
       return user;
     }
   }
-  return undefined;
+  return null;
 };
 
-const urlsForUser = (id, urlDatabase) => {
-  let urlFiltered = {};
-  for (const [uKey, uValue] of Object.entries(urlDatabase)) {
-    if (uValue.userID === id) {
-      urlFiltered[uKey] = uValue;
+// Random string generator
+
+// eslint-disable-next-line func-style
+function generateRandomString() {
+  const chars =
+		"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  for (let i = 6; i > 0; --i)
+    result += chars[Math.floor(Math.random() * chars.length)];
+  return result;
+}
+
+// Check if this short url exists
+const findShortUrlInUrlDatabase = function(shortURL, database) {
+  let urlDatabaseKeys = Object.keys(database);
+  for (let urlToCheck of urlDatabaseKeys) {
+    if (urlToCheck === shortURL) {
+      return true;
     }
   }
-  return urlFiltered;
+  return false;
 };
 
-const validUser = (req, users) => {
-  return req.session.userID !== undefined && users[req.session.userID] !== undefined;
-};
+// URLs for display selector
+const urlsForUser = (id, database) => {
+  let urls = {};
 
-const generateRandomString = () => {
-  return crypto.randomBytes(4).toString('hex');
-};
+  for (const shortURL in database) {
+    if (database[shortURL]["userId"] === id) {
+      urls[shortURL] = database[shortURL].longURL;
+    }
+  }
 
-const getDateTime = () => {
-  let dt = new Date();
-
-  // current date
-  // adjust 0 before single digit date
-  let date = ("0" + dt.getDate()).slice(-2);
-
-  // current month
-  let month = ("0" + (dt.getMonth() + 1)).slice(-2);
-
-  // current year
-  let year = dt.getFullYear();
-
-  // current hours
-  let hours = dt.getHours();
-
-  // current minutes
-  let minutes = dt.getMinutes();
-
-  // current seconds
-  let seconds = dt.getSeconds();
-
-  // prints date & time in YYYY-MM-DD HH:MM:SS format
-  return `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
-
+  return urls;
 };
 
 module.exports = {
-  getUserByEmail,
-  urlsForUser,
-  validUser,
+  findUserByEmail,
   generateRandomString,
-  getDateTime
-};
+  findShortUrlInUrlDatabase,
+  urlsForUser };
