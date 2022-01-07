@@ -1,4 +1,3 @@
-// Find user in database by email
 const findUserByEmail = function(email, database) {
   for (let userID in database) {
     let user = database[userID];
@@ -37,8 +36,10 @@ const urlsForUser = (id, database) => {
   let urls = {};
 
   for (const shortURL in database) {
-    if (database[shortURL]["userId"] === id) {
+    if (database[shortURL]["userID"] === id) {
+      
       urls[shortURL] = database[shortURL].longURL;
+      
     }
   }
 
